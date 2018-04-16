@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 日志统一放在 ${user.home}/logs -->
+	<property name="app.logs.path" value="logs" />
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5p %c{1}:%L - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ROOT"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${app.logs.path}/app.log</File>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%C{1}|%M|%msg|%X{traceId}%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/app.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<appender name="STAT"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${app.logs.path}/stat.log</File>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%C{1}|%M|%msg|%X{traceId}%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/stat.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="stat" additivity="false" level="INFO">
+		<appender-ref ref="STAT" />
+	</logger>
+
+	<!-- trace log -->
+	<appender name="HTTP_ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${app.logs.path}/http_access.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/http_access.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%level|%logger{1}|%X{traceId}|%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.hongwu.hb.trace" level="DEBUG" additivity="false">
+		<appender-ref ref="HTTP_ACCESS"  />
+	</logger>
+
+	<!-- error log-->
+	<appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${app.logs.path}/error.log</File>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss}|%level|%logger{1}|%msg|%X{traceId}%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/error.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+	<logger name="error" additivity="false" level="ERROR">
+		<appender-ref ref="ERROR" />
+	</logger>
+
+	<!-- debug log -->
+	<appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${app.logs.path}/debug.log</File>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/debug.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%level|%logger{1}|%msg|%X{traceId}%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+	<appender name="DEBUG_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>20</discardingThreshold>
+		<queueSize>10240</queueSize>
+		<appender-ref ref="DEBUG" />
+	</appender>
+	<logger name="debug" level="DEBUG" additivity="false">
+		<appender-ref ref="DEBUG_ASYNC" />
+	</logger>
+
+	<!-- info log-->
+	<appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${app.logs.path}/info.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${app.logs.path}/archives/info.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%level|%logger{1}|%msg|%X{traceId}%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+	<appender name="INFO_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>20</discardingThreshold>
+		<queueSize>10240</queueSize>
+		<appender-ref ref="INFO" />
+	</appender>
+	<logger name="info" level="INFO" additivity="false">
+		<appender-ref ref="INFO_ASYNC" />
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="INFO" />
+		<appender-ref ref="DEBUG" />
+		<appender-ref ref="ERROR" />
+	</root>
+</configuration>
